@@ -1,0 +1,51 @@
+{
+  "title": "MCP Server for Lenina",
+  "branchName": "feature/mcp-server",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "MCP Server Setup and Configuration",
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "title": "Anvil Lifecycle Management Tools",
+      "passes": true
+    },
+    {
+      "id": "US-003",
+      "title": "Status and Health Check Tools",
+      "passes": true
+    },
+    {
+      "id": "US-004",
+      "title": "Keys and Accounts Management Tools",
+      "passes": true
+    },
+    {
+      "id": "US-005",
+      "title": "Contract Management Tools",
+      "passes": true
+    },
+    {
+      "id": "US-006",
+      "title": "RPC Proxy Tool",
+      "passes": true
+    },
+    {
+      "id": "US-007",
+      "title": "MCP Tool Registration and Discovery",
+      "passes": true
+    },
+    {
+      "id": "US-008",
+      "title": "Error Handling and Logging",
+      "passes": true
+    },
+    {
+      "id": "US-009",
+      "title": "Documentation and Examples",
+      "passes": true
+    }
+  ]
+}
