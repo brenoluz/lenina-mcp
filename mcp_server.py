@@ -105,6 +105,23 @@ class RpcResponse(BaseModel):
     error: Optional[dict[str, Any]] = Field(default=None, description="Error object if failed")
 
 
+class LogEntry(BaseModel):
+    """Single log entry"""
+
+    line: str = Field(description="Log line content")
+    timestamp: float = Field(description="Unix timestamp when log was captured")
+    sequence: int = Field(description="Sequence number for ordering")
+
+
+class AnvilLogsResponse(BaseModel):
+    """Response from getting Anvil logs"""
+
+    lines: list[LogEntry] = Field(description="List of log entries")
+    totalLines: int = Field(description="Total number of lines in buffer")
+    truncated: bool = Field(description="Whether results were truncated")
+    format: str = Field(description="Output format (markdown/json/text)")
+
+
 # ============================================================================
 # HTTP Client Helper
 # ============================================================================
@@ -352,6 +369,42 @@ async def get_private_keys() -> dict[str, Any]:
 # ============================================================================
 # MCP Tools - Contract Management
 # ============================================================================
+
+
+@mcp.tool(description="Get Anvil console logs from the circular buffer.")
+async def anvil_logs(
+    lines: int = Field(default=100, ge=1, le=1000, description="Number of recent log lines to retrieve"),
+    since: Optional[int] = Field(default=None, description="Get logs after this sequence number"),
+    format: str = Field(default="json", description="Output format: json, markdown, or text"),
+) -> dict[str, Any]:
+    """
+    Get Anvil console logs from the circular buffer.
+
+    Args:
+        lines: Number of recent lines to retrieve (1-1000, default: 100)
+        since: Optional sequence number to get logs after this point
+        format: Output format - json (default), markdown, or text
+
+    Returns:
+        dict: Log entries with line content, timestamps, and sequence numbers
+    """
+    logger.info(f"Getting Anvil logs (lines={lines}, since={since}, format={format})")
+    async with await get_http_client() as client:
+        try:
+            params = {"lines": lines, "format": format}
+            if since is not None:
+                params["since"] = since
+            response = await client.get("/anvil/logs", params=params)
+            response.raise_for_status()
+            data: dict[str, Any] = response.json()
+            logger.info(f"Retrieved {len(data.get('lines', []))} log lines")
+            return data
+        except httpx.ConnectError as e:
+            logger.error(f"Connection failed: {e}")
+            raise RuntimeError(f"Cannot connect to Lenina API: {e}")
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error: {e}")
+            raise RuntimeError(f"Failed to get logs: {e.response.text}")
 
 
 @mcp.tool(description="List all deployed contracts tracked by Anvil.")
