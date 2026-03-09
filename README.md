@@ -1,9 +1,22 @@
 # Lenina MCP Server
 
-MCP (Model Context Protocol) Server for Lenina - Anvil Management. This server exposes all Lenina API endpoints as MCP tools, enabling AI coding assistants (Cursor, Cline, etc.) to control Anvil instances.
+MCP (Model Context Protocol) Server for Lenina - Anvil Management.
+
+## Architecture
+
+```
+AI Assistant ←MCP→ lenina-mcp ←REST→ Lenina API ←→ Anvil Server
+```
+
+- **Anvil**: Blockchain development server (by Foundry)
+- **Lenina**: RESTful API server that manages Anvil instances
+- **lenina-mcp**: MCP server that wraps the Lenina REST API for AI assistants
+
+This server exposes all Lenina REST API endpoints as MCP tools, enabling AI coding assistants (Cursor, Cline, etc.) to control Anvil instances remotely.
 
 ## Features
 
+- **RESTful Integration**: Wraps the Lenina REST API as MCP tools
 - **Full Lenina API Coverage**: All 10 Lenina API endpoints exposed as MCP tools
 - **Type-Safe**: All tools use Pydantic models for parameter validation
 - **Async**: Built with async/await for optimal performance
@@ -146,6 +159,49 @@ Once connected, you can use natural language commands like:
 - "What's the current block number?" (uses rpc_proxy)
 - "Stop the Anvil instance"
 
+## Lenina Skill for AI Assistants
+
+This project includes a skill file (`skills/lenina.md`) that teaches AI assistants how to use Lenina for managing Anvil servers remotely.
+
+### Install the Skill
+
+**For Claude Desktop:**
+```bash
+cp skills/lenina.md ~/.claude/skills/
+```
+
+**For Opencode:**
+```bash
+cp skills/lenina.md ~/.config/opencode/skills/
+```
+
+**For Codex:**
+```bash
+cp skills/lenina.md ~/.codex/skills/
+```
+
+**For Gemini CLI:**
+```bash
+cp skills/lenina.md ~/.gemini/skills/
+```
+
+After copying, the AI assistant will automatically learn how to:
+- Start, stop, and restart Anvil instances
+- Get the correct RPC URL using `get_config` (essential for connecting tools like Hardhat, Foundry, MetaMask)
+- Manage accounts and private keys
+- Deploy and interact with smart contracts
+- Debug using Anvil logs and RPC proxy
+
+### Why Use the Skill
+
+The skill includes critical guidance on:
+1. **Checking `get_config`**: Always run this to get the correct host and port before connecting development tools
+2. **Network configuration**: How to connect when Anvil runs on a remote machine
+3. **Common workflows**: Standard patterns for development, debugging, and testing
+4. **Security warnings**: Important notes about private keys and local-only usage
+
+---
+
 ## Development
 
 ### Type Checking
@@ -161,7 +217,8 @@ mypy --strict mcp_server.py
 ## Requirements
 
 - Python 3.10+
-- Lenina API running at `http://localhost:8000` (or configured URL)
+- Lenina REST API server running at `http://localhost:8000` (or configured URL)
+- Anvil (installed via Foundry)
 
 ## Dependencies
 

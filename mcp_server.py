@@ -24,7 +24,7 @@ logger = logging.getLogger("lenina-mcp")
 mcp = FastMCP("lenina-mcp")
 
 # Configuration
-LENINA_BASE_URL = "http://localhost:8000"
+LENINA_BASE_URL = "http://192.168.1.12:8000"
 
 
 # ============================================================================
@@ -37,9 +37,13 @@ class AnvilConfig(BaseModel):
 
     port: int = Field(default=8545, description="Port to run Anvil on")
     chainId: int = Field(default=31337, description="Chain ID")
-    blockTime: int = Field(default=0, description="Block time in seconds (0 for manual)")
+    blockTime: int = Field(
+        default=0, description="Block time in seconds (0 for manual)"
+    )
     gasLimit: int = Field(default=30000000, description="Gas limit per block")
-    mnemonic: Optional[str] = Field(default=None, description="Mnemonic for deterministic accounts")
+    mnemonic: Optional[str] = Field(
+        default=None, description="Mnemonic for deterministic accounts"
+    )
 
 
 class AnvilStatusResponse(BaseModel):
@@ -47,7 +51,9 @@ class AnvilStatusResponse(BaseModel):
 
     running: bool = Field(description="Whether Anvil is currently running")
     pid: Optional[int] = Field(default=None, description="Process ID if running")
-    uptime: Optional[int] = Field(default=None, description="Uptime in seconds if running")
+    uptime: Optional[int] = Field(
+        default=None, description="Uptime in seconds if running"
+    )
     port: Optional[int] = Field(default=None, description="Port Anvil is running on")
 
 
@@ -102,7 +108,9 @@ class RpcResponse(BaseModel):
     jsonrpc: str = Field(default="2.0", description="JSON-RPC version")
     id: int = Field(description="Request ID")
     result: Optional[Any] = Field(default=None, description="RPC result if successful")
-    error: Optional[dict[str, Any]] = Field(default=None, description="Error object if failed")
+    error: Optional[dict[str, Any]] = Field(
+        default=None, description="Error object if failed"
+    )
 
 
 class LogEntry(BaseModel):
@@ -130,6 +138,29 @@ class AnvilLogsResponse(BaseModel):
 async def get_http_client() -> httpx.AsyncClient:
     """Get an async HTTP client for Lenina API calls."""
     return httpx.AsyncClient(base_url=LENINA_BASE_URL, timeout=30.0)
+
+
+# ============================================================================
+# MCP Tools - Server Configuration
+# ============================================================================
+
+
+@mcp.tool(
+    description="Get the MCP server configuration including LENINA_BASE_URL. Useful for understanding which Lenina API endpoint this MCP server connects to."
+)
+async def get_server_config() -> dict[str, Any]:
+    """
+    Get the MCP server configuration.
+
+    Returns:
+        dict: Server configuration including LENINA_BASE_URL
+    """
+    logger.info("Getting server configuration")
+    return {
+        "LENINA_BASE_URL": LENINA_BASE_URL,
+        "description": "This is the base URL of the Lenina API server that this MCP server connects to. All Anvil management requests are sent to this endpoint.",
+        "usage": "Use this URL to understand which Lenina instance you're controlling. All MCP tools here proxy requests to this base URL.",
+    }
 
 
 # ============================================================================
@@ -168,15 +199,17 @@ async def health_check() -> dict[str, Any]:
 # ============================================================================
 
 
-@mcp.tool(
-    description="Start an Anvil instance with optional configuration parameters."
-)
+@mcp.tool(description="Start an Anvil instance with optional configuration parameters.")
 async def anvil_start(
     port: int = Field(default=8545, description="Port to run Anvil on"),
     chainId: int = Field(default=31337, description="Chain ID"),
-    blockTime: int = Field(default=0, description="Block time in seconds (0 for manual mining)"),
+    blockTime: int = Field(
+        default=0, description="Block time in seconds (0 for manual mining)"
+    ),
     gasLimit: int = Field(default=30000000, description="Gas limit per block"),
-    mnemonic: Optional[str] = Field(default=None, description="Mnemonic for deterministic accounts"),
+    mnemonic: Optional[str] = Field(
+        default=None, description="Mnemonic for deterministic accounts"
+    ),
 ) -> dict[str, Any]:
     """
     Start an Anvil blockchain instance.
@@ -238,9 +271,7 @@ async def anvil_stop() -> dict[str, Any]:
             raise RuntimeError(f"Failed to stop Anvil: {e.response.text}")
 
 
-@mcp.tool(
-    description="Restart an Anvil instance with optional new configuration."
-)
+@mcp.tool(description="Restart an Anvil instance with optional new configuration.")
 async def anvil_restart(
     port: int = Field(default=8545, description="Port to run Anvil on"),
     chainId: int = Field(default=31337, description="Chain ID"),
@@ -373,9 +404,15 @@ async def get_private_keys() -> dict[str, Any]:
 
 @mcp.tool(description="Get Anvil console logs from the circular buffer.")
 async def anvil_logs(
-    lines: int = Field(default=100, ge=1, le=1000, description="Number of recent log lines to retrieve"),
-    since: Optional[int] = Field(default=None, description="Get logs after this sequence number"),
-    format: str = Field(default="json", description="Output format: json, markdown, or text"),
+    lines: int = Field(
+        default=100, ge=1, le=1000, description="Number of recent log lines to retrieve"
+    ),
+    since: Optional[int] = Field(
+        default=None, description="Get logs after this sequence number"
+    ),
+    format: str = Field(
+        default="json", description="Output format: json, markdown, or text"
+    ),
 ) -> dict[str, Any]:
     """
     Get Anvil console logs from the circular buffer.
