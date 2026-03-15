@@ -17,7 +17,7 @@ This server exposes all Lenina REST API endpoints as MCP tools, enabling AI codi
 ## Features
 
 - **RESTful Integration**: Wraps the Lenina REST API as MCP tools
-- **Full Lenina API Coverage**: All 10 Lenina API endpoints exposed as MCP tools
+- **Full Lenina API Coverage**: All 9 Lenina API endpoints exposed as MCP tools
 - **Type-Safe**: All tools use Pydantic models for parameter validation
 - **Async**: Built with async/await for optimal performance
 - **No Authentication**: Designed for local development only (matching Lenina)
@@ -84,11 +84,9 @@ lenina-mcp
   - Includes mnemonic if configured
 
 ### Contract Management
-- **`list_contracts`**: List all deployed contracts
-  - Returns addresses, bytecode, bytecode hashes, and deployment blocks
-
-- **`get_contract`**: Get information about a specific contract
+- **`get_contract`**: Check if contract exists at address
   - `address`: The contract address (0x-prefixed)
+  - Uses `eth_getCode` to verify contract deployment
 
 ### RPC Proxy
 - **`rpc_proxy`**: Send JSON-RPC requests to Anvil
@@ -155,7 +153,7 @@ Once connected, you can use natural language commands like:
 - "Start Anvil on port 8545 with chain ID 31337"
 - "Check if Anvil is running"
 - "Get the private keys for the first 3 accounts"
-- "List all deployed contracts"
+
 - "What's the current block number?" (uses rpc_proxy)
 - "Stop the Anvil instance"
 

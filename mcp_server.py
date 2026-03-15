@@ -78,21 +78,6 @@ class KeysResponse(BaseModel):
     mnemonic: Optional[str] = Field(default=None, description="Mnemonic if configured")
 
 
-class ContractInfo(BaseModel):
-    """Contract information."""
-
-    address: str = Field(description="Contract address")
-    bytecode: str = Field(description="Deployed bytecode")
-    bytecodeHash: str = Field(description="Hash of bytecode")
-    deploymentBlock: int = Field(description="Block number where contract was deployed")
-
-
-class ContractsResponse(BaseModel):
-    """Response from /anvil/contracts endpoint."""
-
-    contracts: list[ContractInfo] = Field(description="List of deployed contracts")
-
-
 class RpcRequest(BaseModel):
     """JSON-RPC request."""
 
@@ -442,30 +427,6 @@ async def anvil_logs(
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error: {e}")
             raise RuntimeError(f"Failed to get logs: {e.response.text}")
-
-
-@mcp.tool(description="List all deployed contracts tracked by Anvil.")
-async def list_contracts() -> dict[str, Any]:
-    """
-    List all deployed contracts.
-
-    Returns:
-        dict: List of contracts with addresses, bytecode, and deployment info
-    """
-    logger.info("Listing contracts")
-    async with await get_http_client() as client:
-        try:
-            response = await client.get("/anvil/contracts")
-            response.raise_for_status()
-            data: dict[str, Any] = response.json()
-            logger.info(f"Found {len(data.get('contracts', []))} contracts")
-            return data
-        except httpx.ConnectError as e:
-            logger.error(f"Connection failed: {e}")
-            raise RuntimeError(f"Cannot connect to Lenina API: {e}")
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error: {e}")
-            raise RuntimeError(f"Failed to list contracts: {e.response.text}")
 
 
 @mcp.tool(description="Get information about a specific contract by address.")
